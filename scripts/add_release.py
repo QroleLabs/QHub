@@ -10,12 +10,20 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-from validate_registry import INDEX_PATH, ROOT, canonical_hash, load_json, validate_manifest
+from validate_registry import (
+    INDEX_PATH,
+    ROOT,
+    canonical_hash,
+    load_json,
+    validate_manifest,
+)
 
 
 def arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("manifest", type=Path, help="plugins/<id>/<version>/manifest.json")
+    parser.add_argument(
+        "manifest", type=Path, help="plugins/<id>/<version>/manifest.json"
+    )
     parser.add_argument("--trust", choices=("official", "reviewed"), default="reviewed")
     parser.add_argument("--repository-url", required=True)
     parser.add_argument("--documentation-url")
@@ -25,7 +33,9 @@ def arguments() -> argparse.Namespace:
 
 def write_atomic(path: Path, value: dict) -> None:
     rendered = json.dumps(value, ensure_ascii=False, indent=2) + "\n"
-    descriptor, temporary = tempfile.mkstemp(prefix=".index-", suffix=".json", dir=path.parent)
+    descriptor, temporary = tempfile.mkstemp(
+        prefix=".index-", suffix=".json", dir=path.parent
+    )
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
             handle.write(rendered)
@@ -73,7 +83,9 @@ def main() -> int:
             "version": version,
             "path": relative_path,
             "manifest_hash": canonical_hash(manifest),
-            "published_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "published_at": datetime.now(timezone.utc)
+            .isoformat()
+            .replace("+00:00", "Z"),
             "manifest": manifest,
         }
     )

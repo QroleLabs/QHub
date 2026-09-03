@@ -190,17 +190,41 @@ def _is_sensitive(name: str, definition: Any) -> bool:
 
 
 def validate_manifest(manifest: dict[str, Any], context: str) -> None:
-    required = {"schema_version", "id", "name", "version", "description", "runtime", "permissions"}
+    required = {
+        "schema_version",
+        "id",
+        "name",
+        "version",
+        "description",
+        "runtime",
+        "permissions",
+    }
     missing = sorted(required - manifest.keys())
     require(not missing, f"{context} 缺少字段：{', '.join(missing)}")
     require(manifest.get("schema_version") == "1", f"{context}.schema_version 只支持 1")
     plugin_id = manifest.get("id")
-    require(isinstance(plugin_id, str) and bool(PLUGIN_ID.fullmatch(plugin_id)), f"{context}.id 非法")
+    require(
+        isinstance(plugin_id, str) and bool(PLUGIN_ID.fullmatch(plugin_id)),
+        f"{context}.id 非法",
+    )
     version = manifest.get("version")
-    require(isinstance(version, str) and bool(SEMVER.fullmatch(version)), f"{context}.version 必须是完整 SemVer")
-    require(isinstance(manifest.get("name"), str) and 0 < len(manifest["name"].strip()) <= 160, f"{context}.name 非法")
-    require(isinstance(manifest.get("description"), str) and len(manifest["description"]) <= 4000, f"{context}.description 非法")
-    encoded = json.dumps(manifest, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    require(
+        isinstance(version, str) and bool(SEMVER.fullmatch(version)),
+        f"{context}.version 必须是完整 SemVer",
+    )
+    require(
+        isinstance(manifest.get("name"), str)
+        and 0 < len(manifest["name"].strip()) <= 160,
+        f"{context}.name 非法",
+    )
+    require(
+        isinstance(manifest.get("description"), str)
+        and len(manifest["description"]) <= 4000,
+        f"{context}.description 非法",
+    )
+    encoded = json.dumps(manifest, ensure_ascii=False, separators=(",", ":")).encode(
+        "utf-8"
+    )
     require(len(encoded) <= MAX_MANIFEST_BYTES, f"{context} 超过 1 MiB")
 
     runtime = manifest.get("runtime")
@@ -208,19 +232,39 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
     runtime_type = runtime.get("type")
     if runtime_type == "prompt":
         runtime_type = "prompt.v1"
-    require(runtime_type in RUNTIME_PERMISSIONS, f"{context} 使用了 QHub 尚未支持的 runtime")
+    require(
+        runtime_type in RUNTIME_PERMISSIONS, f"{context} 使用了 QHub 尚未支持的 runtime"
+    )
     permissions = manifest.get("permissions")
-    require(isinstance(permissions, list) and len(permissions) <= 32, f"{context}.permissions 非法")
-    require(len(permissions) == len(set(permissions)), f"{context}.permissions 不能重复")
-    require(all(isinstance(item, str) and PERMISSION.fullmatch(item) for item in permissions), f"{context}.permissions 格式非法")
+    require(
+        isinstance(permissions, list) and len(permissions) <= 32,
+        f"{context}.permissions 非法",
+    )
+    require(
+        len(permissions) == len(set(permissions)), f"{context}.permissions 不能重复"
+    )
+    require(
+        all(
+            isinstance(item, str) and PERMISSION.fullmatch(item) for item in permissions
+        ),
+        f"{context}.permissions 格式非法",
+    )
     required_permission = RUNTIME_PERMISSIONS[runtime_type]
-    require(permissions == [required_permission], f"{context} 的权限必须且只能是 {required_permission}")
+    require(
+        permissions == [required_permission],
+        f"{context} 的权限必须且只能是 {required_permission}",
+    )
     if runtime_type == "prompt.v1":
-        require(isinstance(runtime.get("prompt"), str) and bool(runtime["prompt"].strip()), f"{context}.runtime.prompt 不能为空")
+        require(
+            isinstance(runtime.get("prompt"), str) and bool(runtime["prompt"].strip()),
+            f"{context}.runtime.prompt 不能为空",
+        )
     if runtime_type == "model-preference.v1":
         schema = manifest.get("config_schema")
         properties = schema.get("properties") if isinstance(schema, dict) else None
-        channel_model = properties.get("channel_model_id") if isinstance(properties, dict) else None
+        channel_model = (
+            properties.get("channel_model_id") if isinstance(properties, dict) else None
+        )
         required_fields = schema.get("required") if isinstance(schema, dict) else None
         require(
             isinstance(channel_model, dict)
@@ -232,8 +276,14 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
 
     schema = manifest.get("config_schema")
     properties = schema.get("properties") if isinstance(schema, dict) else {}
-    require(isinstance(properties, dict), f"{context}.config_schema.properties 必须是对象")
-    sensitive = sorted(name for name, definition in properties.items() if _is_sensitive(name, definition))
+    require(
+        isinstance(properties, dict), f"{context}.config_schema.properties 必须是对象"
+    )
+    sensitive = sorted(
+        name
+        for name, definition in properties.items()
+        if _is_sensitive(name, definition)
+    )
     require(not sensitive, f"{context} 不允许敏感配置字段：{', '.join(sensitive)}")
     for field in ("repository", "homepage", "documentation"):
         if manifest.get(field) is not None:
@@ -244,18 +294,27 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
 
 
 def validate_registry() -> tuple[int, int]:
-    require(INDEX_PATH.stat().st_size <= MAX_INDEX_BYTES, "registry/index.json 超过 5 MiB")
+    require(
+        INDEX_PATH.stat().st_size <= MAX_INDEX_BYTES, "registry/index.json 超过 5 MiB"
+    )
     registry = load_json(INDEX_PATH)
     require(registry.get("schema_version") == "1", "registry.schema_version 只支持 1")
     require(registry.get("name") == "QHub", "registry.name 必须是 QHub")
-    require(isinstance(registry.get("revision"), str) and bool(registry["revision"].strip()), "registry.revision 不能为空")
+    require(
+        isinstance(registry.get("revision"), str)
+        and bool(registry["revision"].strip()),
+        "registry.revision 不能为空",
+    )
     validate_https_url(registry.get("repository"), "registry.repository")
     require(
         registry.get("repository") == QHUB_REPOSITORY_URL,
         f"registry.repository 必须是 {QHUB_REPOSITORY_URL}",
     )
     plugins = registry.get("plugins")
-    require(isinstance(plugins, list) and len(plugins) <= 10000, "registry.plugins 必须是数组")
+    require(
+        isinstance(plugins, list) and len(plugins) <= 10000,
+        "registry.plugins 必须是数组",
+    )
 
     plugin_ids: set[str] = set()
     indexed_paths: set[str] = set()
@@ -264,14 +323,23 @@ def validate_registry() -> tuple[int, int]:
         context = f"plugins[{plugin_index}]"
         require(isinstance(plugin, dict), f"{context} 必须是对象")
         plugin_id = plugin.get("id")
-        require(isinstance(plugin_id, str) and bool(PLUGIN_ID.fullmatch(plugin_id)), f"{context}.id 非法")
+        require(
+            isinstance(plugin_id, str) and bool(PLUGIN_ID.fullmatch(plugin_id)),
+            f"{context}.id 非法",
+        )
         require(plugin_id not in plugin_ids, f"重复插件 id：{plugin_id}")
         plugin_ids.add(plugin_id)
-        require(plugin.get("trust") in {"official", "reviewed"}, f"{context}.trust 非法")
-        require(isinstance(plugin.get("listed"), bool), f"{context}.listed 必须是布尔值")
+        require(
+            plugin.get("trust") in {"official", "reviewed"}, f"{context}.trust 非法"
+        )
+        require(
+            isinstance(plugin.get("listed"), bool), f"{context}.listed 必须是布尔值"
+        )
         validate_https_url(plugin.get("repository_url"), f"{context}.repository_url")
         if plugin.get("documentation_url") is not None:
-            validate_https_url(plugin["documentation_url"], f"{context}.documentation_url")
+            validate_https_url(
+                plugin["documentation_url"], f"{context}.documentation_url"
+            )
         releases = plugin.get("releases")
         require(isinstance(releases, list) and releases, f"{context}.releases 不能为空")
         versions: set[str] = set()
@@ -280,29 +348,56 @@ def validate_registry() -> tuple[int, int]:
             release_context = f"{context}.releases[{release_index}]"
             require(isinstance(release, dict), f"{release_context} 必须是对象")
             version = release.get("version")
-            require(isinstance(version, str) and bool(SEMVER.fullmatch(version)), f"{release_context}.version 非法")
+            require(
+                isinstance(version, str) and bool(SEMVER.fullmatch(version)),
+                f"{release_context}.version 非法",
+            )
             require(version not in versions, f"{plugin_id} 存在重复版本 {version}")
             versions.add(version)
             parsed_versions.append(parse_semver(version))
             expected_path = f"plugins/{plugin_id}/{version}/manifest.json"
             path = release.get("path")
-            require(path == expected_path and PurePosixPath(path).as_posix() == path, f"{release_context}.path 必须是 {expected_path}")
+            require(
+                path == expected_path and PurePosixPath(path).as_posix() == path,
+                f"{release_context}.path 必须是 {expected_path}",
+            )
             require(path not in indexed_paths, f"重复 manifest 路径：{path}")
             indexed_paths.add(path)
             manifest_path = ROOT / path
             require(manifest_path.is_file(), f"缺少 {path}")
             manifest_file = load_json(manifest_path)
             manifest_inline = release.get("manifest")
-            require(isinstance(manifest_inline, dict), f"{release_context}.manifest 必须是对象")
-            require(manifest_file == manifest_inline, f"{release_context}.manifest 与 {path} 不一致")
+            require(
+                isinstance(manifest_inline, dict),
+                f"{release_context}.manifest 必须是对象",
+            )
+            require(
+                manifest_file == manifest_inline,
+                f"{release_context}.manifest 与 {path} 不一致",
+            )
             validate_manifest(manifest_inline, f"{plugin_id}@{version}")
-            require(manifest_inline.get("id") == plugin_id, f"{release_context} 的 manifest.id 不匹配")
-            require(manifest_inline.get("version") == version, f"{release_context} 的 manifest.version 不匹配")
+            require(
+                manifest_inline.get("id") == plugin_id,
+                f"{release_context} 的 manifest.id 不匹配",
+            )
+            require(
+                manifest_inline.get("version") == version,
+                f"{release_context} 的 manifest.version 不匹配",
+            )
             digest = release.get("manifest_hash")
-            require(isinstance(digest, str) and bool(SHA256.fullmatch(digest)), f"{release_context}.manifest_hash 非法")
-            require(digest == canonical_hash(manifest_inline), f"{release_context}.manifest_hash 校验失败")
+            require(
+                isinstance(digest, str) and bool(SHA256.fullmatch(digest)),
+                f"{release_context}.manifest_hash 非法",
+            )
+            require(
+                digest == canonical_hash(manifest_inline),
+                f"{release_context}.manifest_hash 校验失败",
+            )
             published_at = release.get("published_at")
-            require(isinstance(published_at, str), f"{release_context}.published_at 必须是时间")
+            require(
+                isinstance(published_at, str),
+                f"{release_context}.published_at 必须是时间",
+            )
             try:
                 parsed_time = datetime.fromisoformat(
                     published_at.replace("Z", "+00:00")
@@ -323,7 +418,10 @@ def validate_registry() -> tuple[int, int]:
         path.relative_to(ROOT).as_posix()
         for path in ROOT.glob("plugins/*/*/manifest.json")
     }
-    require(indexed_paths == disk_paths, f"索引与插件目录不一致；未索引={sorted(disk_paths - indexed_paths)}，缺失={sorted(indexed_paths - disk_paths)}")
+    require(
+        indexed_paths == disk_paths,
+        f"索引与插件目录不一致；未索引={sorted(disk_paths - indexed_paths)}，缺失={sorted(indexed_paths - disk_paths)}",
+    )
     return len(plugin_ids), release_count
 
 
