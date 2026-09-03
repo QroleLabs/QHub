@@ -3,6 +3,9 @@
 本文面向希望把插件发布到 QHub 的第三方开发者。QScene 插件 v1 是由平台解释执行的
 声明式 Manifest，不是浏览器扩展、Node 包或任意后端代码。
 
+QHub 是默认官方源，并非 QScene 唯一允许的注册地址。希望运营独立目录的维护者可参阅
+[兼容注册表搭建说明](./registry-hosting.md)；插件 Manifest 格式和运行时安全边界保持一致。
+
 ## 1. 先选择 runtime
 
 | runtime | 必需权限 | 用途 | 可读取或改变的内容 |

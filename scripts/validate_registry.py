@@ -17,7 +17,6 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import urlparse
 
-
 ROOT = Path(__file__).resolve().parent.parent
 INDEX_PATH = ROOT / "registry" / "index.json"
 QHUB_REPOSITORY_URL = "https://github.com/QroleLabs/QHub"
@@ -293,23 +292,29 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
         validate_https_url(author["url"], f"{context}.author.url")
 
 
-def validate_registry() -> tuple[int, int]:
+def validate_registry(*, require_qhub_identity: bool = True) -> tuple[int, int]:
     require(
         INDEX_PATH.stat().st_size <= MAX_INDEX_BYTES, "registry/index.json 超过 5 MiB"
     )
     registry = load_json(INDEX_PATH)
     require(registry.get("schema_version") == "1", "registry.schema_version 只支持 1")
-    require(registry.get("name") == "QHub", "registry.name 必须是 QHub")
+    require(
+        isinstance(registry.get("name"), str)
+        and 0 < len(registry["name"].strip()) <= 160,
+        "registry.name 必须是 1 到 160 个字符",
+    )
     require(
         isinstance(registry.get("revision"), str)
         and bool(registry["revision"].strip()),
         "registry.revision 不能为空",
     )
     validate_https_url(registry.get("repository"), "registry.repository")
-    require(
-        registry.get("repository") == QHUB_REPOSITORY_URL,
-        f"registry.repository 必须是 {QHUB_REPOSITORY_URL}",
-    )
+    if require_qhub_identity:
+        require(registry.get("name") == "QHub", "QHub registry.name 必须是 QHub")
+        require(
+            registry.get("repository") == QHUB_REPOSITORY_URL,
+            f"QHub registry.repository 必须是 {QHUB_REPOSITORY_URL}",
+        )
     plugins = registry.get("plugins")
     require(
         isinstance(plugins, list) and len(plugins) <= 10000,
@@ -492,9 +497,16 @@ def main() -> int:
         "--base-ref",
         help="验证相对历史 commit 的 release 不可变性",
     )
+    parser.add_argument(
+        "--compatible",
+        action="store_true",
+        help="校验第三方兼容注册表，不要求 QHub 名称与仓库地址",
+    )
     args = parser.parse_args()
     try:
-        plugin_count, release_count = validate_registry()
+        plugin_count, release_count = validate_registry(
+            require_qhub_identity=not args.compatible
+        )
         if args.base_ref:
             validate_immutable_history(args.base_ref)
     except (RegistryError, OSError) as error:

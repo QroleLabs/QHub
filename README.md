@@ -1,6 +1,7 @@
 # QHub
 
-QHub 是 [QScene](https://github.com/QroleLabs/QScene) 的官方插件注册表。它保存经过审核的
+QHub 是 [QScene](https://github.com/QroleLabs/QScene) 默认的官方插件注册表。QScene 也支持
+管理员添加其他兼容注册表源。QHub 保存经过审核的
 不可变插件 Manifest；QScene 定时读取
 [`registry/index.json`](./registry/index.json)，因此新增和升级插件不再需要修改 QScene
 源码或新增数据库种子迁移。
@@ -15,6 +16,7 @@ QScene 不会从插件仓库下载或执行 JavaScript、CSS、Python、二进�
 - [Manifest JSON Schema](./schemas/plugin-manifest.schema.json)
 - [注册表 JSON Schema](./schemas/registry.schema.json)
 - [安全策略](./SECURITY.md)
+- [搭建兼容注册表](./docs/registry-hosting.md)
 
 ## 注册表地址
 

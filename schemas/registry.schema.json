@@ -7,9 +7,9 @@
   "properties": {
     "$schema": {"type": "string"},
     "schema_version": {"const": "1"},
-    "name": {"const": "QHub"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 160},
     "revision": {"type": "string", "minLength": 1, "maxLength": 80},
-    "repository": {"const": "https://github.com/QroleLabs/QHub"},
+    "repository": {"type": "string", "format": "uri", "maxLength": 2000},
     "plugins": {
       "type": "array",
       "maxItems": 10000,
