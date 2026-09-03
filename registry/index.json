@@ -1,0 +1,51 @@
+{
+  "$schema": "../schemas/registry.schema.json",
+  "schema_version": "1",
+  "name": "QHub",
+  "revision": "2026-09-03.1",
+  "repository": "https://github.com/QroleLabs/QHub",
+  "plugins": [
+    {
+      "id": "com.qscene.model-preference",
+      "trust": "official",
+      "listed": true,
+      "repository_url": "https://github.com/QroleLabs/QHub/tree/main/plugins/com.qscene.model-preference",
+      "documentation_url": "https://github.com/QroleLabs/QHub/tree/main/plugins/com.qscene.model-preference",
+      "releases": [
+        {
+          "version": "1.0.0",
+          "path": "plugins/com.qscene.model-preference/1.0.0/manifest.json",
+          "manifest_hash": "sha256:62e30d0f283f583e2d1464c97cfe00cd3ea41bc7c91c6b76f8d8215cdef8a9f1",
+          "published_at": "2026-09-03T00:00:00Z",
+          "manifest": {
+            "schema_version": "1",
+            "id": "com.qscene.model-preference",
+            "name": "自定义渠道模型",
+            "version": "1.0.0",
+            "description": "选择管理员已开放的渠道模型，作为新建对话的默认模型；对话中的显式选择始终优先。",
+            "category": "模型与渠道",
+            "keywords": ["渠道", "模型", "默认模型", "对话偏好"],
+            "author": {"name": "QScene"},
+            "runtime": {"type": "model-preference.v1"},
+            "permissions": ["chat:model-preference"],
+            "compatibility": {"platform_api": ">=1.0.0 <2.0.0"},
+            "config_schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "channel_model_id": {
+                  "type": "string",
+                  "title": "默认渠道模型",
+                  "description": "仅可选择已启用并配置积分计费的模型；模型停用后自动回退到平台默认值。",
+                  "minLength": 1,
+                  "maxLength": 64
+                }
+              },
+              "required": ["channel_model_id"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

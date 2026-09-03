@@ -1,0 +1,27 @@
+{
+  "schema_version": "1",
+  "id": "com.qscene.model-preference",
+  "name": "自定义渠道模型",
+  "version": "1.0.0",
+  "description": "选择管理员已开放的渠道模型，作为新建对话的默认模型；对话中的显式选择始终优先。",
+  "category": "模型与渠道",
+  "keywords": ["渠道", "模型", "默认模型", "对话偏好"],
+  "author": {"name": "QScene"},
+  "runtime": {"type": "model-preference.v1"},
+  "permissions": ["chat:model-preference"],
+  "compatibility": {"platform_api": ">=1.0.0 <2.0.0"},
+  "config_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "channel_model_id": {
+        "type": "string",
+        "title": "默认渠道模型",
+        "description": "仅可选择已启用并配置积分计费的模型；模型停用后自动回退到平台默认值。",
+        "minLength": 1,
+        "maxLength": 64
+      }
+    },
+    "required": ["channel_model_id"]
+  }
+}
