@@ -15,5 +15,13 @@ jobs:
     steps:
       - name: Check out registry
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - name: Validate immutable registry
         run: python3 scripts/validate_registry.py
+      - name: Protect published pull-request history
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/validate_registry.py --base-ref "${{ github.event.pull_request.base.sha }}"
+      - name: Protect published push history
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        run: python3 scripts/validate_registry.py --base-ref "${{ github.event.before }}"

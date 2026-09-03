@@ -1,0 +1,35 @@
+{
+  "schema_version": "1",
+  "id": "com.qrole.memory",
+  "name": "长期记忆",
+  "version": "1.0.0",
+  "description": "按全局、角色或会话保存长期记忆，并在相关对话中安全注入上下文。",
+  "category": "记忆与上下文",
+  "keywords": ["记忆", "上下文", "角色对话"],
+  "author": {"name": "QScene"},
+  "runtime": {"type": "memory.v1"},
+  "permissions": ["chat:memory"],
+  "compatibility": {"platform_api": ">=1.0.0 <2.0.0"},
+  "config_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "top_k": {
+        "type": "integer",
+        "title": "每次注入条数",
+        "description": "每次对话最多选取的相关记忆数量。",
+        "minimum": 1,
+        "maximum": 20,
+        "default": 8
+      },
+      "max_context_chars": {
+        "type": "integer",
+        "title": "上下文字数上限",
+        "description": "一次请求可注入的长期记忆总字符数。",
+        "minimum": 500,
+        "maximum": 12000,
+        "default": 4000
+      }
+    }
+  }
+}

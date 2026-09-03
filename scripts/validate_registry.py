@@ -3,12 +3,16 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import ipaddress
 import json
 import re
+import subprocess
 import sys
+from dataclasses import dataclass
 from datetime import datetime
+from functools import total_ordering
 from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import urlparse
@@ -57,6 +61,38 @@ class RegistryError(ValueError):
     pass
 
 
+@total_ordering
+@dataclass(frozen=True)
+class SemVer:
+    major: int
+    minor: int
+    patch: int
+    prerelease: tuple[str, ...] | None = None
+
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, SemVer):
+            return NotImplemented
+        core = (self.major, self.minor, self.patch)
+        other_core = (other.major, other.minor, other.patch)
+        if core != other_core:
+            return core < other_core
+        if self.prerelease is None:
+            return False
+        if other.prerelease is None:
+            return True
+        for left, right in zip(self.prerelease, other.prerelease):
+            if left == right:
+                continue
+            left_numeric = left.isdigit()
+            right_numeric = right.isdigit()
+            if left_numeric and right_numeric:
+                return int(left) < int(right)
+            if left_numeric != right_numeric:
+                return left_numeric
+            return left < right
+        return len(self.prerelease) < len(other.prerelease)
+
+
 def _object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     result: dict[str, Any] = {}
     for key, value in pairs:
@@ -74,6 +110,25 @@ def load_json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise RegistryError(f"{path.relative_to(ROOT)} 顶层必须是对象")
     return value
+
+
+def load_json_text(value: str, context: str) -> dict[str, Any]:
+    try:
+        parsed = json.loads(value, object_pairs_hook=_object)
+    except json.JSONDecodeError as error:
+        raise RegistryError(f"{context} 不是有效 JSON：{error}") from error
+    if not isinstance(parsed, dict):
+        raise RegistryError(f"{context} 顶层必须是对象")
+    return parsed
+
+
+def parse_semver(value: str) -> SemVer:
+    require(bool(SEMVER.fullmatch(value)), f"无效 SemVer：{value}")
+    without_build = value.split("+", 1)[0]
+    core, separator, prerelease_value = without_build.partition("-")
+    major, minor, patch = (int(part) for part in core.split("."))
+    prerelease = tuple(prerelease_value.split(".")) if separator else None
+    return SemVer(major, minor, patch, prerelease)
 
 
 def canonical_hash(value: dict[str, Any]) -> str:
@@ -197,6 +252,7 @@ def validate_registry() -> tuple[int, int]:
         releases = plugin.get("releases")
         require(isinstance(releases, list) and releases, f"{context}.releases 不能为空")
         versions: set[str] = set()
+        parsed_versions: list[SemVer] = []
         for release_index, release in enumerate(releases):
             release_context = f"{context}.releases[{release_index}]"
             require(isinstance(release, dict), f"{release_context} 必须是对象")
@@ -204,6 +260,7 @@ def validate_registry() -> tuple[int, int]:
             require(isinstance(version, str) and bool(SEMVER.fullmatch(version)), f"{release_context}.version 非法")
             require(version not in versions, f"{plugin_id} 存在重复版本 {version}")
             versions.add(version)
+            parsed_versions.append(parse_semver(version))
             expected_path = f"plugins/{plugin_id}/{version}/manifest.json"
             path = release.get("path")
             require(path == expected_path and PurePosixPath(path).as_posix() == path, f"{release_context}.path 必须是 {expected_path}")
@@ -224,10 +281,20 @@ def validate_registry() -> tuple[int, int]:
             published_at = release.get("published_at")
             require(isinstance(published_at, str), f"{release_context}.published_at 必须是时间")
             try:
-                datetime.fromisoformat(published_at.replace("Z", "+00:00"))
+                parsed_time = datetime.fromisoformat(
+                    published_at.replace("Z", "+00:00")
+                )
             except ValueError as error:
                 raise RegistryError(f"{release_context}.published_at 非法") from error
+            require(
+                parsed_time.tzinfo is not None,
+                f"{release_context}.published_at 必须包含时区",
+            )
             release_count += 1
+        require(
+            parsed_versions == sorted(parsed_versions),
+            f"{plugin_id} 的 releases 必须按 SemVer 从低到高排列",
+        )
 
     disk_paths = {
         path.relative_to(ROOT).as_posix()
@@ -237,9 +304,78 @@ def validate_registry() -> tuple[int, int]:
     return len(plugin_ids), release_count
 
 
+def validate_immutable_history(base_ref: str) -> None:
+    require(
+        bool(re.fullmatch(r"[0-9a-fA-F]{7,40}", base_ref)),
+        "--base-ref 必须是 Git commit SHA",
+    )
+    completed = subprocess.run(
+        ["git", "show", f"{base_ref}:registry/index.json"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        raise RegistryError(f"无法读取基准提交 {base_ref} 的注册表")
+    previous = load_json_text(completed.stdout, f"{base_ref}:registry/index.json")
+    current = load_json(INDEX_PATH)
+    previous_plugins = {
+        plugin["id"]: plugin
+        for plugin in previous.get("plugins", [])
+        if isinstance(plugin, dict) and isinstance(plugin.get("id"), str)
+    }
+    current_plugins = {
+        plugin["id"]: plugin
+        for plugin in current.get("plugins", [])
+        if isinstance(plugin, dict) and isinstance(plugin.get("id"), str)
+    }
+    for plugin_id, old_plugin in previous_plugins.items():
+        require(
+            plugin_id in current_plugins,
+            f"已发布插件 {plugin_id} 不得删除；请设置 listed=false",
+        )
+        new_plugin = current_plugins[plugin_id]
+        old_releases = {
+            release["version"]: release
+            for release in old_plugin.get("releases", [])
+            if isinstance(release, dict) and isinstance(release.get("version"), str)
+        }
+        new_releases = {
+            release["version"]: release
+            for release in new_plugin.get("releases", [])
+            if isinstance(release, dict) and isinstance(release.get("version"), str)
+        }
+        for version, old_release in old_releases.items():
+            require(
+                new_releases.get(version) == old_release,
+                f"不可变版本被删除或覆盖：{plugin_id}@{version}",
+            )
+        if old_releases:
+            highest_old = max(parse_semver(version) for version in old_releases)
+            for version in new_releases.keys() - old_releases.keys():
+                require(
+                    parse_semver(version) > highest_old,
+                    f"{plugin_id} 的新版本 {version} 必须高于已有最高版本",
+                )
+    if previous != current:
+        require(
+            previous.get("revision") != current.get("revision"),
+            "registry 内容变化时必须更新 revision",
+        )
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--base-ref",
+        help="验证相对历史 commit 的 release 不可变性",
+    )
+    args = parser.parse_args()
     try:
         plugin_count, release_count = validate_registry()
+        if args.base_ref:
+            validate_immutable_history(args.base_ref)
     except (RegistryError, OSError) as error:
         print(f"QHub validation failed: {error}", file=sys.stderr)
         return 1

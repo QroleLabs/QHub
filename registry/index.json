@@ -2,9 +2,71 @@
   "$schema": "../schemas/registry.schema.json",
   "schema_version": "1",
   "name": "QHub",
-  "revision": "2026-09-03.1",
+  "revision": "20260903065252",
   "repository": "https://github.com/QroleLabs/QHub",
   "plugins": [
+    {
+      "id": "com.qrole.memory",
+      "trust": "official",
+      "listed": true,
+      "repository_url": "https://github.com/QroleLabs/QHub/tree/main/plugins/com.qrole.memory",
+      "releases": [
+        {
+          "version": "1.0.0",
+          "path": "plugins/com.qrole.memory/1.0.0/manifest.json",
+          "manifest_hash": "sha256:2d411ee1934f53fe2036241d25d3f884baa9d7e88730e7c709072e921a7f5f2d",
+          "published_at": "2026-09-03T06:52:52.134965Z",
+          "manifest": {
+            "schema_version": "1",
+            "id": "com.qrole.memory",
+            "name": "长期记忆",
+            "version": "1.0.0",
+            "description": "按全局、角色或会话保存长期记忆，并在相关对话中安全注入上下文。",
+            "category": "记忆与上下文",
+            "keywords": [
+              "记忆",
+              "上下文",
+              "角色对话"
+            ],
+            "author": {
+              "name": "QScene"
+            },
+            "runtime": {
+              "type": "memory.v1"
+            },
+            "permissions": [
+              "chat:memory"
+            ],
+            "compatibility": {
+              "platform_api": ">=1.0.0 <2.0.0"
+            },
+            "config_schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "top_k": {
+                  "type": "integer",
+                  "title": "每次注入条数",
+                  "description": "每次对话最多选取的相关记忆数量。",
+                  "minimum": 1,
+                  "maximum": 20,
+                  "default": 8
+                },
+                "max_context_chars": {
+                  "type": "integer",
+                  "title": "上下文字数上限",
+                  "description": "一次请求可注入的长期记忆总字符数。",
+                  "minimum": 500,
+                  "maximum": 12000,
+                  "default": 4000
+                }
+              }
+            }
+          }
+        }
+      ],
+      "documentation_url": "https://github.com/QroleLabs/QHub/tree/main/plugins/com.qrole.memory"
+    },
     {
       "id": "com.qscene.model-preference",
       "trust": "official",
@@ -24,11 +86,24 @@
             "version": "1.0.0",
             "description": "选择管理员已开放的渠道模型，作为新建对话的默认模型；对话中的显式选择始终优先。",
             "category": "模型与渠道",
-            "keywords": ["渠道", "模型", "默认模型", "对话偏好"],
-            "author": {"name": "QScene"},
-            "runtime": {"type": "model-preference.v1"},
-            "permissions": ["chat:model-preference"],
-            "compatibility": {"platform_api": ">=1.0.0 <2.0.0"},
+            "keywords": [
+              "渠道",
+              "模型",
+              "默认模型",
+              "对话偏好"
+            ],
+            "author": {
+              "name": "QScene"
+            },
+            "runtime": {
+              "type": "model-preference.v1"
+            },
+            "permissions": [
+              "chat:model-preference"
+            ],
+            "compatibility": {
+              "platform_api": ">=1.0.0 <2.0.0"
+            },
             "config_schema": {
               "type": "object",
               "additionalProperties": false,
@@ -41,7 +116,9 @@
                   "maxLength": 64
                 }
               },
-              "required": ["channel_model_id"]
+              "required": [
+                "channel_model_id"
+              ]
             }
           }
         }

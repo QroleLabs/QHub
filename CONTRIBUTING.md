@@ -10,7 +10,8 @@
 3. 将完全相同的 Manifest 放到
    `plugins/<manifest.id>/<manifest.version>/manifest.json`。
 4. 运行 `scripts/add_release.py`，第三方插件使用 `--trust reviewed`。
-5. 运行 `python3 scripts/validate_registry.py`。
+5. 运行 `python3 scripts/validate_registry.py`。QHub CI 还会与目标分支的 Git commit 比较，
+   拒绝同时改写旧 Manifest 与哈希的提交。
 6. 提交 Pull Request，并在说明中附上仓库、tag、功能、权限和测试证据。
 
 ## 不可变版本
