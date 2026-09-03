@@ -9,7 +9,7 @@
     "schema_version": {"const": "1"},
     "name": {"const": "QHub"},
     "revision": {"type": "string", "minLength": 1, "maxLength": 80},
-    "repository": {"type": "string", "format": "uri", "maxLength": 2000},
+    "repository": {"const": "https://github.com/QroleLabs/QHub"},
     "plugins": {
       "type": "array",
       "maxItems": 10000,

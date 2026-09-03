@@ -20,6 +20,7 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 INDEX_PATH = ROOT / "registry" / "index.json"
+QHUB_REPOSITORY_URL = "https://github.com/QroleLabs/QHub"
 MAX_INDEX_BYTES = 5 * 1024 * 1024
 MAX_MANIFEST_BYTES = 1024 * 1024
 PLUGIN_ID = re.compile(r"^[a-z0-9][a-z0-9._-]{2,159}$")
@@ -156,8 +157,23 @@ def validate_https_url(value: Any, field: str) -> None:
     try:
         address = ipaddress.ip_address(parsed.hostname or "")
     except ValueError:
+        hostname = (parsed.hostname or "").lower()
+        require(
+            hostname != "localhost" and not hostname.endswith(".local"),
+            f"{field} 不能指向本地主机",
+        )
         return
-    require(not (address.is_private or address.is_loopback or address.is_link_local), f"{field} 不能指向私有地址")
+    require(
+        not (
+            address.is_private
+            or address.is_loopback
+            or address.is_link_local
+            or address.is_reserved
+            or address.is_multicast
+            or address.is_unspecified
+        ),
+        f"{field} 不能指向私有或保留地址",
+    )
 
 
 def _is_sensitive(name: str, definition: Any) -> bool:
@@ -222,6 +238,9 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
     for field in ("repository", "homepage", "documentation"):
         if manifest.get(field) is not None:
             validate_https_url(manifest[field], f"{context}.{field}")
+    author = manifest.get("author")
+    if isinstance(author, dict) and author.get("url") is not None:
+        validate_https_url(author["url"], f"{context}.author.url")
 
 
 def validate_registry() -> tuple[int, int]:
@@ -231,6 +250,10 @@ def validate_registry() -> tuple[int, int]:
     require(registry.get("name") == "QHub", "registry.name 必须是 QHub")
     require(isinstance(registry.get("revision"), str) and bool(registry["revision"].strip()), "registry.revision 不能为空")
     validate_https_url(registry.get("repository"), "registry.repository")
+    require(
+        registry.get("repository") == QHUB_REPOSITORY_URL,
+        f"registry.repository 必须是 {QHUB_REPOSITORY_URL}",
+    )
     plugins = registry.get("plugins")
     require(isinstance(plugins, list) and len(plugins) <= 10000, "registry.plugins 必须是数组")
 
