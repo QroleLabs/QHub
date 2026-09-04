@@ -19,6 +19,8 @@ jobs:
           fetch-depth: 0
       - name: Validate immutable registry
         run: python3 scripts/validate_registry.py
+      - name: Test manifest policy
+        run: python3 -m unittest discover -s tests -v
       - name: Protect published pull-request history
         if: github.event_name == 'pull_request'
         run: python3 scripts/validate_registry.py --base-ref "${{ github.event.pull_request.base.sha }}"

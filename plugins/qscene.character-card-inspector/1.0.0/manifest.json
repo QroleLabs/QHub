@@ -1,0 +1,33 @@
+{
+  "schema_version": "1",
+  "id": "qscene.character-card-inspector",
+  "name": "Character Card Inspector",
+  "version": "1.0.0",
+  "description": "检查 Character Card V1/V2/V3、World Book、Regex 和大致 Token 占用。",
+  "category": "角色卡工具",
+  "keywords": ["角色卡", "世界书", "正则", "兼容性"],
+  "author": {"name": "QroleLabs"},
+  "repository": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.character-card-inspector",
+  "documentation": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.character-card-inspector/README.md",
+  "license": "MIT",
+  "runtime": {
+    "type": "internal.python.v1",
+    "entrypoint": "plugin:create_plugin"
+  },
+  "capabilities": ["role-card-inspector.v1"],
+  "permissions": ["role-card:inspect"],
+  "compatibility": {"platform_api": ">=1.0.0 <2.0.0"},
+  "config_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "token_warning_threshold": {
+        "type": "integer",
+        "title": "Token 警告阈值",
+        "minimum": 500,
+        "maximum": 100000,
+        "default": 8000
+      }
+    }
+  }
+}

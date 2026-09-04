@@ -1,15 +1,17 @@
 # 向 QHub 发布插件
 
-感谢为 QScene 开发插件。请先阅读
+当前 QHub 只接受 QroleLabs 官方维护者发布的插件版本，第三方投稿入口暂时关闭。既有
+目录、`reviewed` 信任级别和 API 契约不会删除，以便未来重新开放。维护者请先阅读
 [插件开发说明](./docs/plugin-development.md)，并遵守以下流程。
 
 ## Pull Request 清单
 
-1. 在你自己的公开 Git 仓库中维护插件文档和源 Manifest。
-2. 为发布版本创建不可变 Git tag；`manifest.version` 使用完整 SemVer。
+1. 在 QroleLabs 仓库中维护插件文档和源 Manifest；内部 Python Handler 必须随 QScene
+   镜像发布，QHub 不托管 Handler。
+2. 为发布版本创建不可变 Git commit 或 tag；`manifest.version` 使用完整 SemVer。
 3. 将完全相同的 Manifest 放到
    `plugins/<manifest.id>/<manifest.version>/manifest.json`。
-4. 运行 `scripts/add_release.py`，第三方插件使用 `--trust reviewed`。
+4. 运行 `scripts/add_release.py --trust official`。`official` 只能由 QroleLabs 维护者设置。
 5. 运行 `python3 scripts/validate_registry.py`。QHub CI 还会与目标分支的 Git commit 比较，
    拒绝同时改写旧 Manifest 与哈希的提交。
 6. 提交 Pull Request，并在说明中附上仓库、tag、功能、权限和测试证据。
@@ -30,5 +32,6 @@
 - 仓库、文档、许可证及版本 tag 是否清晰；
 - 更新是否增加权限，以及是否需要用户重新确认授权。
 
-合并表示该 Manifest 快照进入 QHub 市场审核链，不代表 QroleLabs 为第三方内容背书。
-维护者可以拒绝、下架或要求修复不安全、误导、侵权或不可维护的插件。
+合并表示该 Manifest 快照进入 QHub 市场审核链。维护者可以拒绝、下架或要求修复不安全、
+误导、侵权或不可维护的插件。未来重新开放第三方投稿时，第三方只能使用 `reviewed`，且
+不得借此向 QScene 主进程投递可执行代码。

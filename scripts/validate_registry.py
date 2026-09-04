@@ -36,6 +36,13 @@ RUNTIME_PERMISSIONS = {
     "memory.v1": "chat:memory",
     "model-preference.v1": "chat:model-preference",
 }
+INTERNAL_RUNTIME = "internal.python.v1"
+INTERNAL_CAPABILITY_PERMISSIONS = {
+    "context-provider.v1": "chat:context",
+    "chat-action.v1": "chat:action",
+    "role-card-inspector.v1": "role-card:inspect",
+    "event-handler.v1": "events:observe",
+}
 SENSITIVE_PARTS = {
     "auth",
     "authorization",
@@ -232,7 +239,8 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
     if runtime_type == "prompt":
         runtime_type = "prompt.v1"
     require(
-        runtime_type in RUNTIME_PERMISSIONS, f"{context} 使用了 QHub 尚未支持的 runtime"
+        runtime_type in {*RUNTIME_PERMISSIONS, INTERNAL_RUNTIME},
+        f"{context} 使用了 QHub 尚未支持的 runtime",
     )
     permissions = manifest.get("permissions")
     require(
@@ -248,11 +256,40 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
         ),
         f"{context}.permissions 格式非法",
     )
-    required_permission = RUNTIME_PERMISSIONS[runtime_type]
-    require(
-        permissions == [required_permission],
-        f"{context} 的权限必须且只能是 {required_permission}",
-    )
+    if runtime_type == INTERNAL_RUNTIME:
+        capabilities = manifest.get("capabilities")
+        require(
+            isinstance(capabilities, list)
+            and bool(capabilities)
+            and len(capabilities) == len(set(capabilities))
+            and all(
+                capability in INTERNAL_CAPABILITY_PERMISSIONS
+                for capability in capabilities
+            ),
+            f"{context}.capabilities 必须是非空且仅包含已实现 Capability 的数组",
+        )
+        expected_permissions = {
+            INTERNAL_CAPABILITY_PERMISSIONS[capability]
+            for capability in capabilities
+        }
+        require(
+            set(permissions) == expected_permissions
+            and len(permissions) == len(expected_permissions),
+            f"{context} 的权限必须与 Capability 精确匹配",
+        )
+        entrypoint = runtime.get("entrypoint")
+        require(
+            isinstance(entrypoint, str)
+            and 3 <= len(entrypoint) <= 240
+            and entrypoint.endswith(":create_plugin"),
+            f"{context}.runtime.entrypoint 必须指向 create_plugin",
+        )
+    else:
+        required_permission = RUNTIME_PERMISSIONS[runtime_type]
+        require(
+            permissions == [required_permission],
+            f"{context} 的权限必须且只能是 {required_permission}",
+        )
     if runtime_type == "prompt.v1":
         require(
             isinstance(runtime.get("prompt"), str) and bool(runtime["prompt"].strip()),
@@ -283,7 +320,8 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
         for name, definition in properties.items()
         if _is_sensitive(name, definition)
     )
-    require(not sensitive, f"{context} 不允许敏感配置字段：{', '.join(sensitive)}")
+    if runtime_type != INTERNAL_RUNTIME:
+        require(not sensitive, f"{context} 不允许敏感配置字段：{', '.join(sensitive)}")
     for field in ("repository", "homepage", "documentation"):
         if manifest.get(field) is not None:
             validate_https_url(manifest[field], f"{context}.{field}")
@@ -381,6 +419,14 @@ def validate_registry(*, require_qhub_identity: bool = True) -> tuple[int, int]:
                 f"{release_context}.manifest 与 {path} 不一致",
             )
             validate_manifest(manifest_inline, f"{plugin_id}@{version}")
+            if (
+                isinstance(manifest_inline.get("runtime"), dict)
+                and manifest_inline["runtime"].get("type") == INTERNAL_RUNTIME
+            ):
+                require(
+                    plugin.get("trust") == "official",
+                    f"{plugin_id} 的 internal.python.v1 release 必须为 official",
+                )
             require(
                 manifest_inline.get("id") == plugin_id,
                 f"{release_context} 的 manifest.id 不匹配",

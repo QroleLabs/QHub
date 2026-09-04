@@ -59,6 +59,7 @@
       "properties": {
         "type": {"type": "string", "minLength": 1, "maxLength": 80},
         "prompt": {"type": "string", "maxLength": 32000},
+        "entrypoint": {"type": "string", "minLength": 3, "maxLength": 240},
         "entrypoints": {"type": "object"}
       },
       "allOf": [
@@ -79,6 +80,20 @@
         "pattern": "^[a-z][a-z0-9._-]*:[a-z][a-z0-9._:-]*$"
       }
     },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "context-provider.v1",
+          "chat-action.v1",
+          "role-card-inspector.v1",
+          "event-handler.v1"
+        ]
+      }
+    },
     "compatibility": {
       "type": "object",
       "properties": {
@@ -97,6 +112,22 @@
     "css": {}
   },
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "runtime": {
+            "properties": {"type": {"const": "internal.python.v1"}},
+            "required": ["type"]
+          }
+        }
+      },
+      "then": {
+        "required": ["capabilities"],
+        "properties": {
+          "runtime": {"required": ["entrypoint"]}
+        }
+      }
+    },
     {
       "if": {
         "properties": {

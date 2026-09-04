@@ -1,0 +1,42 @@
+{
+  "schema_version": "1",
+  "id": "qscene.scene-director",
+  "name": "Scene Director",
+  "version": "1.0.0",
+  "description": "为当前角色对话提供受上下文预算约束的剧情导演建议。",
+  "category": "角色对话",
+  "keywords": ["剧情", "导演", "上下文"],
+  "author": {"name": "QroleLabs"},
+  "repository": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.scene-director",
+  "documentation": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.scene-director/README.md",
+  "license": "MIT",
+  "runtime": {
+    "type": "internal.python.v1",
+    "entrypoint": "plugin:create_plugin"
+  },
+  "capabilities": ["context-provider.v1"],
+  "permissions": ["chat:context"],
+  "compatibility": {"platform_api": ">=1.0.0 <2.0.0"},
+  "config_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "guidance": {
+        "type": "string",
+        "title": "剧情导演建议",
+        "description": "每一轮对话都会作为独立、可裁剪的 Context Fragment 提交。",
+        "minLength": 1,
+        "maxLength": 2000,
+        "default": "推动当前场景自然发展，保持人物动机一致，并为用户留下有意义的选择。"
+      },
+      "priority": {
+        "type": "integer",
+        "title": "上下文优先级",
+        "description": "预算紧张时用于决定该建议是否保留。",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 55
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "1",
+  "id": "qscene.dice-tools",
+  "name": "Dice Tools",
+  "version": "1.0.0",
+  "description": "在聊天工具栏提供 d6、d20 和 d100 掷骰子动作。",
+  "category": "聊天工具",
+  "keywords": ["骰子", "随机", "动作"],
+  "author": {"name": "QroleLabs"},
+  "repository": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.dice-tools",
+  "documentation": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.dice-tools/README.md",
+  "license": "MIT",
+  "runtime": {
+    "type": "internal.python.v1",
+    "entrypoint": "plugin:create_plugin"
+  },
+  "capabilities": ["chat-action.v1"],
+  "permissions": ["chat:action"],
+  "compatibility": {"platform_api": ">=1.0.0 <2.0.0"},
+  "config_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "default_die": {
+        "type": "string",
+        "title": "默认骰子",
+        "enum": ["d6", "d20", "d100"],
+        "default": "d20"
+      }
+    }
+  }
+}

@@ -6,10 +6,14 @@ QHub 是 [QScene](https://github.com/QroleLabs/QScene) 默认的官方插件注�
 [`registry/index.json`](./registry/index.json)，因此新增和升级插件不再需要修改 QScene
 源码或新增数据库种子迁移。
 
-QHub 是注册表，不是第三方代码执行仓库。当前插件均使用 QScene 提供的声明式运行时，
-QScene 不会从插件仓库下载或执行 JavaScript、CSS、Python、二进制文件或 hooks。
+QHub 是注册表，不是代码分发或执行仓库。QScene 支持现有声明式 runtime，以及仅随
+QScene 镜像发布、由 QroleLabs 审核的 `internal.python.v1` Handler。QScene 不会从 QHub
+或插件仓库下载 Python、JavaScript、CSS、二进制文件或在线安装依赖。
 
-## 开发者入口
+当前第三方投稿入口关闭。注册表继续保留兼容注册表、`reviewed` 信任级别和投稿所需的
+数据契约，供以后恢复扩展；目前 QHub 新增 release 仅由 QroleLabs 维护者操作。
+
+## 维护者入口
 
 - [插件开发完整说明](./docs/plugin-development.md)
 - [贡献与发布流程](./CONTRIBUTING.md)
@@ -40,16 +44,16 @@ cp /path/to/qscene-plugin.manifest.json \
   plugins/dev.example.context-tools/1.0.0/manifest.json
 
 python3 scripts/add_release.py \
-  plugins/dev.example.context-tools/1.0.0/manifest.json \
-  --trust reviewed \
-  --repository-url https://github.com/example/context-tools \
-  --documentation-url https://github.com/example/context-tools#readme
+  plugins/qscene.example-tools/1.0.0/manifest.json \
+  --trust official \
+  --repository-url https://github.com/QroleLabs/QScene \
+  --documentation-url https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.example-tools/README.md
 
 python3 scripts/validate_registry.py
 ```
 
-第三方插件必须使用 `reviewed`；`official` 只由 QroleLabs 维护者授予。提交 Pull Request
-后，QHub CI 会执行同一套零依赖校验。
+`official` 只由 QroleLabs 维护者授予。第三方投稿恢复后只能使用 `reviewed`，但当前此
+入口不开放。提交 Pull Request 后，QHub CI 会执行同一套零依赖校验。
 
 ## 仓库布局
 
@@ -62,5 +66,5 @@ QHub/
 └── docs/
 ```
 
-The registry and contributor documentation are public so third-party authors can build and review
-plugins without access to the QScene deployment or source tree.
+注册表规范公开，便于审计并为以后恢复第三方生态保留兼容性；当前可执行的内部插件代码
+只存在于 QScene 构建上下文中。

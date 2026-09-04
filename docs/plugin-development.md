@@ -1,7 +1,11 @@
 # QScene 插件开发说明
 
-本文面向希望把插件发布到 QHub 的第三方开发者。QScene 插件 v1 是由平台解释执行的
-声明式 Manifest，不是浏览器扩展、Node 包或任意后端代码。
+本文是 QroleLabs 官方维护者的 QHub 发布说明。当前第三方投稿入口关闭；相关数据结构、
+`reviewed` 信任级别和兼容注册表契约仍保留，供未来恢复扩展。
+
+QHub 只保存不可变 Manifest。声明式 runtime 由平台解释执行；`internal.python.v1` 仅把
+Manifest 与已经随 QScene 镜像部署的官方 Handler 对应起来。QHub 不托管、下载或执行
+Python、JavaScript、CSS、二进制文件，也不在线安装依赖。
 
 QHub 是默认官方源，并非 QScene 唯一允许的注册地址。希望运营独立目录的维护者可参阅
 [兼容注册表搭建说明](./registry-hosting.md)；插件 Manifest 格式和运行时安全边界保持一致。
@@ -13,10 +17,21 @@ QHub 是默认官方源，并非 QScene 唯一允许的注册地址。希望运�
 | `prompt.v1` | `chat:context` | 为对话附加经过审核的系统上下文 | 只注入 Manifest 中固定的 prompt 和明确标记为 runtime-visible 的非敏感配置 |
 | `memory.v1` | `chat:memory` | 使用用户自己维护的长期记忆 | 只检索当前用户、当前角色或当前会话范围的数据 |
 | `model-preference.v1` | `chat:model-preference` | 设置新对话默认渠道模型 | 只能选择管理员启用并配置积分计费的模型 |
+| `internal.python.v1` | 由 Capability 精确决定 | 连接 QScene 镜像中的官方 Handler | 只接收 Plugin SDK DTO、受限存储和受限 HTTP 客户端 |
 
-QScene 不执行 Manifest 中的 JS、CSS、Python、二进制文件、hooks 或任意网络回调。如果
-需求无法由现有 runtime 表达，应先向 QScene 提出新的、可隔离的 runtime 设计；仅在这种
-情况下才需要升级 QScene 本身。
+`internal.python.v1` 当前允许四种 Capability：
+
+| Capability | 唯一权限 | 用途 |
+| --- | --- | --- |
+| `context-provider.v1` | `chat:context` | 返回受 Context Engine 预算控制的上下文片段 |
+| `chat-action.v1` | `chat:action` | 声明聊天、消息或角色卡菜单动作 |
+| `role-card-inspector.v1` | `role-card:inspect` | 返回诊断、建议和可确认的受限 JSON Patch |
+| `event-handler.v1` | `events:observe` | 处理核心事务提交后的非关键事件 |
+
+每个 Capability 必须只申请表中的权限。代码入口格式为
+`"runtime": {"type": "internal.python.v1", "entrypoint": "plugin:create_plugin"}`；代码
+版本、Manifest 版本和 Capability 必须完全一致。Handler 的创建、测试和部署请参阅
+[QScene Internal Plugin Framework 文档](https://github.com/QroleLabs/QScene/blob/main/docs/internal-plugins.md)。
 
 ## 2. 创建开发仓库
 
@@ -92,12 +107,15 @@ https://raw.githubusercontent.com/QroleLabs/QHub/main/schemas/plugin-manifest.sc
 普通配置默认只保存在插件安装记录中。只有属性明确声明
 `"x-runtime-visible": true` 时，`prompt.v1` 才能在运行时读取该非敏感标量。
 
-QHub 不接受下列配置：
+声明式 runtime 不接受下列配置：
 
 - API Key、Token、密码、Cookie、JWT、Bearer 或登录凭据；
 - 数据库连接串、DSN、会话密钥；
 - `writeOnly`、`x-sensitive` 或 `format: password` 字段；
 - 试图创建渠道、读取渠道 Base URL/密钥或绕过 QScene 积分计费的字段。
+
+内部官方 Handler 可以声明 `x-sensitive` 或 `writeOnly` 标量，由 QScene 现有加密配置机制
+保存；API 不回显其值，插件也只能得到自己的当前安装设置。
 
 ## 5. Runtime 示例
 
@@ -140,7 +158,7 @@ QHub 不接受下列配置：
 
 ## 6. 本地验证与发布
 
-Fork 并克隆 QHub，把 Manifest 保存到不可变目录：
+QroleLabs 维护者把与 QScene 插件目录完全相同的 Manifest 保存到不可变目录：
 
 ```bash
 plugins/<plugin-id>/<version>/manifest.json
@@ -150,10 +168,10 @@ plugins/<plugin-id>/<version>/manifest.json
 
 ```bash
 python3 scripts/add_release.py \
-  plugins/dev.example.context-tools/1.0.0/manifest.json \
-  --trust reviewed \
-  --repository-url https://github.com/example/context-tools \
-  --documentation-url https://github.com/example/context-tools#readme
+  plugins/qscene.example-tools/1.0.0/manifest.json \
+  --trust official \
+  --repository-url https://github.com/QroleLabs/QScene \
+  --documentation-url https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.example-tools/README.md
 
 python3 scripts/validate_registry.py
 ```
@@ -161,13 +179,14 @@ python3 scripts/validate_registry.py
 辅助脚本会把 Manifest 快照写入单文件注册表、计算 SHA-256 并更新 registry revision。
 它会拒绝覆盖已有版本。之后提交 Pull Request，并附上：
 
-- 插件仓库与不可变 tag；
+- QScene Handler 的 commit 或不可变 tag；
 - 功能说明和截图（如适用）；
 - 每项权限的必要性；
-- Manifest 和 prompt 的测试方式；
+- Manifest、Handler 和故障隔离的测试方式；
 - 许可证及第三方内容来源。
 
-第三方提交只能选择 `reviewed`。`official` 表示由 QroleLabs 直接维护，由 QHub 维护者设置。
+`official` 表示由 QroleLabs 直接维护，只能由 QHub 维护者设置。未来恢复第三方投稿后，
+第三方只能选择 `reviewed`，且只能使用届时明确开放的安全 runtime，不能投递进程内代码。
 
 ## 7. 安装、升级和下架语义
 

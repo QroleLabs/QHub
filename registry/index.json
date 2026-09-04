@@ -2,7 +2,7 @@
   "$schema": "../schemas/registry.schema.json",
   "schema_version": "1",
   "name": "QHub",
-  "revision": "20260903065252",
+  "revision": "20260904043716",
   "repository": "https://github.com/QroleLabs/QHub",
   "plugins": [
     {
@@ -123,6 +123,199 @@
           }
         }
       ]
+    },
+    {
+      "id": "qscene.character-card-inspector",
+      "trust": "official",
+      "listed": true,
+      "repository_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.character-card-inspector",
+      "releases": [
+        {
+          "version": "1.0.0",
+          "path": "plugins/qscene.character-card-inspector/1.0.0/manifest.json",
+          "manifest_hash": "sha256:092a217a1a9caa60f0ec2f0a75be57e8ab07dc4fd52ad539142140fd4de15474",
+          "published_at": "2026-09-04T04:37:16.534801Z",
+          "manifest": {
+            "schema_version": "1",
+            "id": "qscene.character-card-inspector",
+            "name": "Character Card Inspector",
+            "version": "1.0.0",
+            "description": "检查 Character Card V1/V2/V3、World Book、Regex 和大致 Token 占用。",
+            "category": "角色卡工具",
+            "keywords": [
+              "角色卡",
+              "世界书",
+              "正则",
+              "兼容性"
+            ],
+            "author": {
+              "name": "QroleLabs"
+            },
+            "repository": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.character-card-inspector",
+            "documentation": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.character-card-inspector/README.md",
+            "license": "MIT",
+            "runtime": {
+              "type": "internal.python.v1",
+              "entrypoint": "plugin:create_plugin"
+            },
+            "capabilities": [
+              "role-card-inspector.v1"
+            ],
+            "permissions": [
+              "role-card:inspect"
+            ],
+            "compatibility": {
+              "platform_api": ">=1.0.0 <2.0.0"
+            },
+            "config_schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "token_warning_threshold": {
+                  "type": "integer",
+                  "title": "Token 警告阈值",
+                  "minimum": 500,
+                  "maximum": 100000,
+                  "default": 8000
+                }
+              }
+            }
+          }
+        }
+      ],
+      "documentation_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.character-card-inspector/README.md"
+    },
+    {
+      "id": "qscene.dice-tools",
+      "trust": "official",
+      "listed": true,
+      "repository_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.dice-tools",
+      "releases": [
+        {
+          "version": "1.0.0",
+          "path": "plugins/qscene.dice-tools/1.0.0/manifest.json",
+          "manifest_hash": "sha256:b3346fe0748c6dabfe2524f8d85ab862f7617a18c9ffe152028f7fb118c130ef",
+          "published_at": "2026-09-04T04:37:16.588032Z",
+          "manifest": {
+            "schema_version": "1",
+            "id": "qscene.dice-tools",
+            "name": "Dice Tools",
+            "version": "1.0.0",
+            "description": "在聊天工具栏提供 d6、d20 和 d100 掷骰子动作。",
+            "category": "聊天工具",
+            "keywords": [
+              "骰子",
+              "随机",
+              "动作"
+            ],
+            "author": {
+              "name": "QroleLabs"
+            },
+            "repository": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.dice-tools",
+            "documentation": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.dice-tools/README.md",
+            "license": "MIT",
+            "runtime": {
+              "type": "internal.python.v1",
+              "entrypoint": "plugin:create_plugin"
+            },
+            "capabilities": [
+              "chat-action.v1"
+            ],
+            "permissions": [
+              "chat:action"
+            ],
+            "compatibility": {
+              "platform_api": ">=1.0.0 <2.0.0"
+            },
+            "config_schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "default_die": {
+                  "type": "string",
+                  "title": "默认骰子",
+                  "enum": [
+                    "d6",
+                    "d20",
+                    "d100"
+                  ],
+                  "default": "d20"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "documentation_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.dice-tools/README.md"
+    },
+    {
+      "id": "qscene.scene-director",
+      "trust": "official",
+      "listed": true,
+      "repository_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.scene-director",
+      "releases": [
+        {
+          "version": "1.0.0",
+          "path": "plugins/qscene.scene-director/1.0.0/manifest.json",
+          "manifest_hash": "sha256:011c0191395cfe37a5831f322d3317dda816022c4f298e86e6d7bab136720739",
+          "published_at": "2026-09-04T04:37:16.641183Z",
+          "manifest": {
+            "schema_version": "1",
+            "id": "qscene.scene-director",
+            "name": "Scene Director",
+            "version": "1.0.0",
+            "description": "为当前角色对话提供受上下文预算约束的剧情导演建议。",
+            "category": "角色对话",
+            "keywords": [
+              "剧情",
+              "导演",
+              "上下文"
+            ],
+            "author": {
+              "name": "QroleLabs"
+            },
+            "repository": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.scene-director",
+            "documentation": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.scene-director/README.md",
+            "license": "MIT",
+            "runtime": {
+              "type": "internal.python.v1",
+              "entrypoint": "plugin:create_plugin"
+            },
+            "capabilities": [
+              "context-provider.v1"
+            ],
+            "permissions": [
+              "chat:context"
+            ],
+            "compatibility": {
+              "platform_api": ">=1.0.0 <2.0.0"
+            },
+            "config_schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "guidance": {
+                  "type": "string",
+                  "title": "剧情导演建议",
+                  "description": "每一轮对话都会作为独立、可裁剪的 Context Fragment 提交。",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "default": "推动当前场景自然发展，保持人物动机一致，并为用户留下有意义的选择。"
+                },
+                "priority": {
+                  "type": "integer",
+                  "title": "上下文优先级",
+                  "description": "预算紧张时用于决定该建议是否保留。",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "default": 55
+                }
+              }
+            }
+          }
+        }
+      ],
+      "documentation_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.scene-director/README.md"
     }
   ]
 }
