@@ -162,6 +162,21 @@
       "if": {
         "properties": {
           "runtime": {
+            "properties": {"type": {"const": "relationship.v1"}},
+            "required": ["type"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "permissions": {"contains": {"const": "chat:relationship"}}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "runtime": {
             "properties": {"type": {"const": "model-preference.v1"}},
             "required": ["type"]
           }

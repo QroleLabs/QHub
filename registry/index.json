@@ -2,7 +2,7 @@
   "$schema": "../schemas/registry.schema.json",
   "schema_version": "1",
   "name": "QHub",
-  "revision": "20260904043716",
+  "revision": "20260905025233",
   "repository": "https://github.com/QroleLabs/QHub",
   "plugins": [
     {
@@ -66,6 +66,61 @@
         }
       ],
       "documentation_url": "https://github.com/QroleLabs/QHub/tree/main/plugins/com.qrole.memory"
+    },
+    {
+      "id": "com.qrole.relationship",
+      "trust": "official",
+      "listed": true,
+      "repository_url": "https://github.com/QroleLabs/QHub/tree/main/plugins/com.qrole.relationship",
+      "releases": [
+        {
+          "version": "1.0.0",
+          "path": "plugins/com.qrole.relationship/1.0.0/manifest.json",
+          "manifest_hash": "sha256:fe17793d1caf3e703b7b79933daced4437e3cd01657c0dd42265dc9d22174d32",
+          "published_at": "2026-09-05T02:52:33.115066Z",
+          "manifest": {
+            "schema_version": "1",
+            "id": "com.qrole.relationship",
+            "name": "轻量关系状态",
+            "version": "1.0.0",
+            "description": "由用户主动维护当前 Persona、角色和剧情分支的称呼、熟悉与交流边界。",
+            "category": "记忆与上下文",
+            "keywords": [
+              "关系",
+              "称呼",
+              "交流边界",
+              "角色对话"
+            ],
+            "author": {
+              "name": "QScene"
+            },
+            "runtime": {
+              "type": "relationship.v1"
+            },
+            "permissions": [
+              "chat:relationship"
+            ],
+            "compatibility": {
+              "platform_api": ">=1.0.0 <2.0.0"
+            },
+            "config_schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "max_context_chars": {
+                  "type": "integer",
+                  "title": "上下文字数上限",
+                  "description": "一次对话最多注入的关系状态参考信息。",
+                  "minimum": 200,
+                  "maximum": 4000,
+                  "default": 1200
+                }
+              }
+            }
+          }
+        }
+      ],
+      "documentation_url": "https://github.com/QroleLabs/QScene/blob/main/docs/chat-continuity-v1.md"
     },
     {
       "id": "com.qscene.model-preference",

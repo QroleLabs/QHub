@@ -34,6 +34,7 @@ PERMISSION = re.compile(r"^[a-z][a-z0-9._-]*:[a-z][a-z0-9._:-]*$")
 RUNTIME_PERMISSIONS = {
     "prompt.v1": "chat:context",
     "memory.v1": "chat:memory",
+    "relationship.v1": "chat:relationship",
     "model-preference.v1": "chat:model-preference",
 }
 INTERNAL_RUNTIME = "internal.python.v1"
