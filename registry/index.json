@@ -2,7 +2,7 @@
   "$schema": "../schemas/registry.schema.json",
   "schema_version": "1",
   "name": "QHub",
-  "revision": "20260905025233",
+  "revision": "20260905072835",
   "repository": "https://github.com/QroleLabs/QHub",
   "plugins": [
     {
@@ -182,7 +182,7 @@
     {
       "id": "qscene.character-card-inspector",
       "trust": "official",
-      "listed": true,
+      "listed": false,
       "repository_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.character-card-inspector",
       "releases": [
         {
@@ -306,7 +306,7 @@
     {
       "id": "qscene.scene-director",
       "trust": "official",
-      "listed": true,
+      "listed": false,
       "repository_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.scene-director",
       "releases": [
         {
