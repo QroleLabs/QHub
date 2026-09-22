@@ -43,6 +43,7 @@ INTERNAL_CAPABILITY_PERMISSIONS = {
     "chat-action.v1": "chat:action",
     "role-card-inspector.v1": "role-card:inspect",
     "event-handler.v1": "events:observe",
+    "image-provider.v1": "image:generate",
 }
 SENSITIVE_PARTS = {
     "auth",

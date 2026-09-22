@@ -90,7 +90,8 @@
           "context-provider.v1",
           "chat-action.v1",
           "role-card-inspector.v1",
-          "event-handler.v1"
+          "event-handler.v1",
+          "image-provider.v1"
         ]
       }
     },

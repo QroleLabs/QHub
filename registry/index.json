@@ -2,7 +2,7 @@
   "$schema": "../schemas/registry.schema.json",
   "schema_version": "1",
   "name": "QHub",
-  "revision": "20260905072835",
+  "revision": "20260922061346",
   "repository": "https://github.com/QroleLabs/QHub",
   "plugins": [
     {
@@ -302,6 +302,186 @@
         }
       ],
       "documentation_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.dice-tools/README.md"
+    },
+    {
+      "id": "qscene.novelai-images",
+      "trust": "official",
+      "listed": true,
+      "repository_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.novelai-images",
+      "releases": [
+        {
+          "version": "1.0.0",
+          "path": "plugins/qscene.novelai-images/1.0.0/manifest.json",
+          "manifest_hash": "sha256:1c9c1b57a09b262551297454f66811552da65e0d0052592cbf460c2a8d8c78df",
+          "published_at": "2026-09-22T06:13:46.215430Z",
+          "manifest": {
+            "schema_version": "1",
+            "id": "qscene.novelai-images",
+            "name": "NovelAI 图片生成",
+            "version": "1.0.0",
+            "description": "用你自己的 NovelAI 订阅在对话里生成图片。填入 NovelAI 持久 API Token 后，对话页的「生成图片」按钮、每条消息下的生图按钮和角色卡的生图请求都会改用 NAI Diffusion 模型，消耗你账户里的 Anlas，不占用平台积分。",
+            "category": "图片生成",
+            "keywords": [
+              "NovelAI",
+              "图片",
+              "插画",
+              "Anlas",
+              "NAI Diffusion"
+            ],
+            "author": {
+              "name": "QroleLabs"
+            },
+            "repository": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.novelai-images",
+            "documentation": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.novelai-images/README.md",
+            "license": "MIT",
+            "runtime": {
+              "type": "internal.python.v1",
+              "entrypoint": "plugin:create_plugin"
+            },
+            "capabilities": [
+              "image-provider.v1",
+              "chat-action.v1"
+            ],
+            "permissions": [
+              "image:generate",
+              "chat:action"
+            ],
+            "compatibility": {
+              "platform_api": ">=1.0.0 <2.0.0"
+            },
+            "config_schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "api_token"
+              ],
+              "properties": {
+                "api_token": {
+                  "type": "string",
+                  "title": "NovelAI API Token",
+                  "description": "在 novelai.net 的 Settings → Account → Get Persistent API Token 获取，以 pst- 开头。只保存在你的账户里，加密存储。",
+                  "format": "password",
+                  "maxLength": 4096
+                },
+                "model": {
+                  "type": "string",
+                  "title": "模型",
+                  "enum": [
+                    "nai-diffusion-4-5-full",
+                    "nai-diffusion-4-5-curated",
+                    "nai-diffusion-4-full",
+                    "nai-diffusion-4-curated-preview",
+                    "nai-diffusion-3",
+                    "nai-diffusion-furry-3"
+                  ],
+                  "default": "nai-diffusion-4-5-full"
+                },
+                "size": {
+                  "type": "string",
+                  "title": "默认尺寸",
+                  "description": "Opus 订阅在 1024×1024 像素以内、28 步以内的单张生成不消耗 Anlas。",
+                  "enum": [
+                    "832x1216",
+                    "1216x832",
+                    "1024x1024",
+                    "512x768",
+                    "768x512",
+                    "640x640",
+                    "1024x1536",
+                    "1536x1024",
+                    "1472x1472"
+                  ],
+                  "default": "832x1216"
+                },
+                "sampler": {
+                  "type": "string",
+                  "title": "采样器",
+                  "enum": [
+                    "k_euler_ancestral",
+                    "k_euler",
+                    "k_dpmpp_2m",
+                    "k_dpmpp_2s_ancestral",
+                    "k_dpmpp_sde",
+                    "k_dpmpp_2m_sde",
+                    "ddim"
+                  ],
+                  "default": "k_euler_ancestral"
+                },
+                "steps": {
+                  "type": "integer",
+                  "title": "步数",
+                  "minimum": 1,
+                  "maximum": 50,
+                  "default": 28
+                },
+                "scale": {
+                  "type": "number",
+                  "title": "提示词相关性（Guidance）",
+                  "minimum": 1,
+                  "maximum": 10,
+                  "default": 5
+                },
+                "uc_preset": {
+                  "type": "string",
+                  "title": "负面预设",
+                  "description": "对应 NovelAI 的 Undesired Content 预设。",
+                  "enum": [
+                    "heavy",
+                    "light",
+                    "human_focus",
+                    "none"
+                  ],
+                  "default": "heavy"
+                },
+                "negative_prompt": {
+                  "type": "string",
+                  "title": "附加负面提示词",
+                  "description": "追加在负面预设之后，逗号分隔。",
+                  "maxLength": 2000,
+                  "default": ""
+                },
+                "quality_tags": {
+                  "type": "boolean",
+                  "title": "自动追加质量标签",
+                  "default": true
+                },
+                "noise_schedule": {
+                  "type": "string",
+                  "title": "噪声调度",
+                  "enum": [
+                    "karras",
+                    "native",
+                    "exponential",
+                    "polyexponential"
+                  ],
+                  "default": "karras"
+                },
+                "cfg_rescale": {
+                  "type": "number",
+                  "title": "CFG Rescale",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0
+                },
+                "smea": {
+                  "type": "boolean",
+                  "title": "SMEA（仅 V3 模型）",
+                  "default": false
+                },
+                "seed": {
+                  "type": "integer",
+                  "title": "固定种子",
+                  "description": "0 表示每次随机。",
+                  "minimum": 0,
+                  "maximum": 4294967295,
+                  "default": 0
+                }
+              }
+            }
+          }
+        }
+      ],
+      "documentation_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.novelai-images/README.md"
     },
     {
       "id": "qscene.scene-director",
