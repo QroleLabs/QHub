@@ -116,6 +116,10 @@
           "type": "string",
           "maxLength": 32000
         },
+        "prompt_rules": {
+          "type": "object",
+          "description": "image-provider.v1: quality tags, negative presets and setting names; runtime.prompt stays a string in every runtime type."
+        },
         "entrypoint": {
           "type": "string",
           "minLength": 3,

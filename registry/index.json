@@ -2,7 +2,7 @@
   "$schema": "../schemas/registry.schema.json",
   "schema_version": "1",
   "name": "QHub",
-  "revision": "20260922071519",
+  "revision": "20260922082234",
   "repository": "https://github.com/QroleLabs/QHub",
   "plugins": [
     {
@@ -307,7 +307,7 @@
       "id": "qscene.novelai-images",
       "trust": "official",
       "listed": true,
-      "repository_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/official/qscene.novelai-images",
+      "repository_url": "https://github.com/QroleLabs/QScene/tree/main/plugins/declarative/qscene.novelai-images",
       "releases": [
         {
           "version": "1.0.0",
@@ -481,15 +481,15 @@
           }
         },
         {
-          "version": "1.1.0",
-          "path": "plugins/qscene.novelai-images/1.1.0/manifest.json",
-          "manifest_hash": "sha256:f37b88e3fd4e5ed5b8ffe9b72d811350e3b262e9c0d4680a2ae8835657e70552",
-          "published_at": "2026-09-22T07:15:19.234253Z",
+          "version": "1.1.1",
+          "path": "plugins/qscene.novelai-images/1.1.1/manifest.json",
+          "manifest_hash": "sha256:5e5ac528b0e9251a7ec8780f26cbba7acdabd8020690e1c80879e0ec95775c71",
+          "published_at": "2026-09-22T08:22:34.255516Z",
           "manifest": {
             "schema_version": "1",
             "id": "qscene.novelai-images",
             "name": "NovelAI 图片生成",
-            "version": "1.1.0",
+            "version": "1.1.1",
             "description": "用你自己的 NovelAI 订阅在对话里生成图片。填入 NovelAI 持久 API Token 后，对话页的「生成图片」按钮、每条消息下的生图按钮和角色卡的生图请求都会改用 NAI Diffusion 模型，消耗你账户里的 Anlas，不占用平台积分。",
             "category": "图片生成",
             "keywords": [
@@ -656,7 +656,7 @@
                   }
                 ]
               },
-              "prompt": {
+              "prompt_rules": {
                 "model_setting": "model",
                 "size_setting": "size",
                 "seed_setting": "seed",

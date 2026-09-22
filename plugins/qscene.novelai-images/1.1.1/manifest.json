@@ -2,7 +2,7 @@
   "schema_version": "1",
   "id": "qscene.novelai-images",
   "name": "NovelAI 图片生成",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "用你自己的 NovelAI 订阅在对话里生成图片。填入 NovelAI 持久 API Token 后，对话页的「生成图片」按钮、每条消息下的生图按钮和角色卡的生图请求都会改用 NAI Diffusion 模型，消耗你账户里的 Anlas，不占用平台积分。",
   "category": "图片生成",
   "keywords": ["NovelAI", "图片", "插画", "Anlas", "NAI Diffusion"],
@@ -121,7 +121,7 @@
         }
       ]
     },
-    "prompt": {
+    "prompt_rules": {
       "model_setting": "model",
       "size_setting": "size",
       "seed_setting": "seed",

@@ -27,7 +27,7 @@ QHub 是默认官方源，并非 QScene 唯一允许的注册地址。希望运�
 | `chat-action.v1` | `chat:action` | 声明聊天、消息或角色卡菜单动作 |
 | `role-card-inspector.v1` | `role-card:inspect` | 返回诊断、建议和可确认的受限 JSON Patch |
 | `event-handler.v1` | `events:observe` | 处理核心事务提交后的非关键事件 |
-| `image-provider.v1` | `image:generate` | 声明一个图片生成器并组装上游请求；QScene 在插件执行器之外下载图片。也可作为纯声明式 runtime.type 发布，manifest 直接描述请求模板 |
+| `image-provider.v1` | `image:generate` | 声明一个图片生成器并组装上游请求；QScene 在插件执行器之外下载图片。也可作为纯声明式 runtime.type 发布，manifest 用 `runtime.provider` / `runtime.request` / `runtime.prompt_rules` 直接描述请求模板与提示词规则（`runtime.prompt` 在所有运行时里都是字符串字段） |
 
 每个 Capability 必须只申请表中的权限。代码入口格式为
 `"runtime": {"type": "internal.python.v1", "entrypoint": "plugin:create_plugin"}`；代码

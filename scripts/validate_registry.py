@@ -293,6 +293,13 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
             permissions == [required_permission],
             f"{context} 的权限必须且只能是 {required_permission}",
         )
+    # The platform schema types runtime.prompt as a string for every runtime
+    # type; a manifest that stores an object there is rejected by QScene even
+    # when the runtime-specific checks below pass.
+    require(
+        runtime.get("prompt") is None or isinstance(runtime.get("prompt"), str),
+        f"{context}.runtime.prompt 必须是字符串（其他结构请放在 runtime.prompt_rules 等专用字段）",
+    )
     if runtime_type == "prompt.v1":
         require(
             isinstance(runtime.get("prompt"), str) and bool(runtime["prompt"].strip()),
@@ -310,6 +317,7 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
         headers = request.get("headers") or {}
         require(isinstance(headers, dict) and not {str(k).lower() for k in headers} & {"host", "connection", "cookie", "content-length", "transfer-encoding", "accept-encoding"}, f"{context}.runtime.request.headers 含不允许的头")
         require(request.get("body") is not None or (isinstance(request.get("variants"), list) and request["variants"] and all(isinstance(v, dict) and v.get("body") is not None for v in request["variants"])), f"{context}.runtime.request 需要 body 或每个 variant 的 body")
+        require(runtime.get("prompt_rules") is None or isinstance(runtime.get("prompt_rules"), dict), f"{context}.runtime.prompt_rules 必须是对象")
     if runtime_type == "model-preference.v1":
         schema = manifest.get("config_schema")
         properties = schema.get("properties") if isinstance(schema, dict) else None
