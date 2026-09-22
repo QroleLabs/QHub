@@ -13,59 +13,135 @@
     "permissions"
   ],
   "properties": {
-    "$schema": {"type": "string"},
-    "schema_version": {"const": "1"},
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1"
+    },
     "id": {
       "type": "string",
       "minLength": 3,
       "maxLength": 160,
       "pattern": "^[a-z0-9][a-z0-9._-]*$"
     },
-    "name": {"type": "string", "minLength": 1, "maxLength": 160},
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
     "version": {
       "type": "string",
       "maxLength": 64,
       "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
     },
-    "description": {"type": "string", "maxLength": 4000},
-    "category": {"type": "string", "minLength": 1, "maxLength": 80},
+    "description": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
     "keywords": {
       "type": "array",
       "maxItems": 20,
       "uniqueItems": true,
-      "items": {"type": "string", "minLength": 1, "maxLength": 80}
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80
+      }
     },
     "author": {
       "oneOf": [
-        {"type": "string", "minLength": 1, "maxLength": 160},
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
         {
           "type": "object",
-          "required": ["name"],
+          "required": [
+            "name"
+          ],
           "properties": {
-            "name": {"type": "string", "minLength": 1, "maxLength": 160},
-            "url": {"type": "string", "format": "uri", "maxLength": 2000}
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "maxLength": 2000
+            }
           },
           "additionalProperties": true
         }
       ]
     },
-    "repository": {"type": "string", "format": "uri", "maxLength": 2000},
-    "homepage": {"type": "string", "format": "uri", "maxLength": 2000},
-    "documentation": {"type": "string", "format": "uri", "maxLength": 2000},
-    "license": {"type": "string", "maxLength": 80},
+    "repository": {
+      "type": "string",
+      "format": "uri",
+      "maxLength": 2000
+    },
+    "homepage": {
+      "type": "string",
+      "format": "uri",
+      "maxLength": 2000
+    },
+    "documentation": {
+      "type": "string",
+      "format": "uri",
+      "maxLength": 2000
+    },
+    "license": {
+      "type": "string",
+      "maxLength": 80
+    },
     "runtime": {
       "type": "object",
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "properties": {
-        "type": {"type": "string", "minLength": 1, "maxLength": 80},
-        "prompt": {"type": "string", "maxLength": 32000},
-        "entrypoint": {"type": "string", "minLength": 3, "maxLength": 240},
-        "entrypoints": {"type": "object"}
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "prompt": {
+          "type": "string",
+          "maxLength": 32000
+        },
+        "entrypoint": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "entrypoints": {
+          "type": "object"
+        }
       },
       "allOf": [
         {
-          "if": {"properties": {"type": {"enum": ["prompt", "prompt.v1"]}}},
-          "then": {"required": ["prompt"]}
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "prompt",
+                  "prompt.v1"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "prompt"
+            ]
+          }
         }
       ],
       "additionalProperties": true
@@ -107,8 +183,12 @@
       },
       "additionalProperties": true
     },
-    "config_schema": {"$ref": "#/$defs/configSchema"},
-    "entrypoints": {"type": "object"},
+    "config_schema": {
+      "$ref": "#/$defs/configSchema"
+    },
+    "entrypoints": {
+      "type": "object"
+    },
     "js": {},
     "css": {}
   },
@@ -117,93 +197,196 @@
       "if": {
         "properties": {
           "runtime": {
-            "properties": {"type": {"const": "internal.python.v1"}},
-            "required": ["type"]
-          }
-        }
-      },
-      "then": {
-        "required": ["capabilities"],
-        "properties": {
-          "runtime": {"required": ["entrypoint"]}
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "runtime": {
-            "properties": {"type": {"enum": ["prompt", "prompt.v1"]}},
-            "required": ["type"]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "permissions": {"contains": {"const": "chat:context"}}
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "runtime": {
-            "properties": {"type": {"const": "memory.v1"}},
-            "required": ["type"]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "permissions": {"contains": {"const": "chat:memory"}}
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "runtime": {
-            "properties": {"type": {"const": "relationship.v1"}},
-            "required": ["type"]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "permissions": {"contains": {"const": "chat:relationship"}}
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "runtime": {
-            "properties": {"type": {"const": "model-preference.v1"}},
-            "required": ["type"]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "permissions": {"contains": {"const": "chat:model-preference"}},
-          "config_schema": {
-            "required": ["properties", "required"],
             "properties": {
-              "required": {"contains": {"const": "channel_model_id"}},
+              "type": {
+                "const": "internal.python.v1"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "capabilities"
+        ],
+        "properties": {
+          "runtime": {
+            "required": [
+              "entrypoint"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "runtime": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "prompt",
+                  "prompt.v1"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "permissions": {
+            "contains": {
+              "const": "chat:context"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "runtime": {
+            "properties": {
+              "type": {
+                "const": "memory.v1"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "permissions": {
+            "contains": {
+              "const": "chat:memory"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "runtime": {
+            "properties": {
+              "type": {
+                "const": "relationship.v1"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "permissions": {
+            "contains": {
+              "const": "chat:relationship"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "runtime": {
+            "properties": {
+              "type": {
+                "const": "model-preference.v1"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "permissions": {
+            "contains": {
+              "const": "chat:model-preference"
+            }
+          },
+          "config_schema": {
+            "required": [
+              "properties",
+              "required"
+            ],
+            "properties": {
+              "required": {
+                "contains": {
+                  "const": "channel_model_id"
+                }
+              },
               "properties": {
-                "required": ["channel_model_id"],
+                "required": [
+                  "channel_model_id"
+                ],
                 "properties": {
                   "channel_model_id": {
                     "type": "object",
-                    "required": ["type"],
-                    "properties": {"type": {"const": "string"}}
+                    "required": [
+                      "type"
+                    ],
+                    "properties": {
+                      "type": {
+                        "const": "string"
+                      }
+                    }
                   }
                 }
               }
             }
           }
         },
-        "required": ["config_schema"]
+        "required": [
+          "config_schema"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "runtime": {
+            "properties": {
+              "type": {
+                "const": "image-provider.v1"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "permissions": {
+            "contains": {
+              "const": "image:generate"
+            }
+          },
+          "runtime": {
+            "required": [
+              "provider",
+              "request"
+            ]
+          }
+        }
       }
     }
   ],
@@ -211,31 +394,70 @@
     "configSchema": {
       "type": "object",
       "properties": {
-        "type": {"const": "object"},
+        "type": {
+          "const": "object"
+        },
         "required": {
           "type": "array",
           "uniqueItems": true,
-          "items": {"type": "string"}
+          "items": {
+            "type": "string"
+          }
         },
-        "additionalProperties": {"type": "boolean"},
+        "additionalProperties": {
+          "type": "boolean"
+        },
         "properties": {
           "type": "object",
           "additionalProperties": {
             "type": "object",
             "properties": {
-              "type": {"enum": ["string", "number", "integer", "boolean"]},
-              "title": {"type": "string"},
-              "description": {"type": "string"},
+              "type": {
+                "enum": [
+                  "string",
+                  "number",
+                  "integer",
+                  "boolean"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
               "default": {},
-              "enum": {"type": "array", "minItems": 1, "maxItems": 50},
-              "minLength": {"type": "integer", "minimum": 0},
-              "maxLength": {"type": "integer", "minimum": 0},
-              "minimum": {"type": "number"},
-              "maximum": {"type": "number"},
-              "format": {"type": "string"},
-              "writeOnly": {"type": "boolean"},
-              "x-sensitive": {"type": "boolean"},
-              "x-runtime-visible": {"type": "boolean"}
+              "enum": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 50
+              },
+              "minLength": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "maxLength": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "minimum": {
+                "type": "number"
+              },
+              "maximum": {
+                "type": "number"
+              },
+              "format": {
+                "type": "string"
+              },
+              "writeOnly": {
+                "type": "boolean"
+              },
+              "x-sensitive": {
+                "type": "boolean"
+              },
+              "x-runtime-visible": {
+                "type": "boolean"
+              }
             },
             "additionalProperties": true
           }

@@ -1,0 +1,230 @@
+{
+  "schema_version": "1",
+  "id": "qscene.novelai-images",
+  "name": "NovelAI 图片生成",
+  "version": "1.1.0",
+  "description": "用你自己的 NovelAI 订阅在对话里生成图片。填入 NovelAI 持久 API Token 后，对话页的「生成图片」按钮、每条消息下的生图按钮和角色卡的生图请求都会改用 NAI Diffusion 模型，消耗你账户里的 Anlas，不占用平台积分。",
+  "category": "图片生成",
+  "keywords": ["NovelAI", "图片", "插画", "Anlas", "NAI Diffusion"],
+  "author": {"name": "QroleLabs"},
+  "repository": "https://github.com/QroleLabs/QScene/tree/main/plugins/declarative/qscene.novelai-images",
+  "documentation": "https://github.com/QroleLabs/QScene/blob/main/docs/plugins/novelai-images.md",
+  "license": "MIT",
+  "runtime": {
+    "type": "image-provider.v1",
+    "provider": {
+      "provider_id": "novelai",
+      "title": "NovelAI",
+      "description": "使用你自己的 NovelAI 订阅生成图片，消耗账户 Anlas。",
+      "models": [
+        {"id": "nai-diffusion-4-5-full", "title": "NAI Diffusion V4.5 Full"},
+        {"id": "nai-diffusion-4-5-curated", "title": "NAI Diffusion V4.5 Curated"},
+        {"id": "nai-diffusion-4-full", "title": "NAI Diffusion V4 Full"},
+        {"id": "nai-diffusion-4-curated-preview", "title": "NAI Diffusion V4 Curated"},
+        {"id": "nai-diffusion-3", "title": "NAI Diffusion Anime V3"},
+        {"id": "nai-diffusion-furry-3", "title": "NAI Diffusion Furry V3"}
+      ],
+      "sizes": ["832x1216", "1216x832", "1024x1024", "512x768", "768x512", "640x640", "1024x1536", "1536x1024", "1472x1472"],
+      "default_size": "832x1216",
+      "supports_negative_prompt": true,
+      "credit_cost": 0
+    },
+    "request": {
+      "method": "POST",
+      "url": "https://image.novelai.net/ai/generate-image",
+      "headers": {
+        "Authorization": "Bearer {{settings.api_token}}",
+        "Content-Type": "application/json",
+        "Accept": "application/x-zip-compressed, application/zip, */*"
+      },
+      "response_kind": "zip_image",
+      "timeout_seconds": 180,
+      "variants": [
+        {
+          "when": {"model_prefix": "nai-diffusion-4"},
+          "body": {
+            "input": "{{prompt}}",
+            "model": "{{model}}",
+            "action": "generate",
+            "parameters": {
+              "width": "{{width}}",
+              "height": "{{height}}",
+              "scale": "{{settings.scale}}",
+              "sampler": "{{settings.sampler}}",
+              "steps": "{{settings.steps}}",
+              "seed": "{{seed}}",
+              "n_samples": 1,
+              "negative_prompt": "{{negative_prompt}}",
+              "ucPreset": "{{negative_preset_index}}",
+              "qualityToggle": "{{settings.quality_tags}}",
+              "dynamic_thresholding": false,
+              "controlnet_strength": 1,
+              "legacy": false,
+              "add_original_image": true,
+              "cfg_rescale": "{{settings.cfg_rescale}}",
+              "noise_schedule": "{{settings.noise_schedule}}",
+              "uncond_scale": 1,
+              "params_version": 3,
+              "sm": false,
+              "sm_dyn": false,
+              "autoSmea": false,
+              "use_coords": false,
+              "legacy_v3_extend": false,
+              "legacy_uc": false,
+              "prefer_brownian": true,
+              "deliberate_euler_ancestral_bug": false,
+              "skip_cfg_above_sigma": null,
+              "normalize_reference_strength_multiple": true,
+              "characterPrompts": [],
+              "v4_prompt": {
+                "caption": {"base_caption": "{{prompt}}", "char_captions": []},
+                "use_coords": false,
+                "use_order": true
+              },
+              "v4_negative_prompt": {
+                "caption": {"base_caption": "{{negative_prompt}}", "char_captions": []},
+                "legacy_uc": false
+              }
+            }
+          }
+        },
+        {
+          "settings_map": {"sampler": {"ddim": "ddim_v3"}},
+          "body": {
+            "input": "{{prompt}}",
+            "model": "{{model}}",
+            "action": "generate",
+            "parameters": {
+              "width": "{{width}}",
+              "height": "{{height}}",
+              "scale": "{{settings.scale}}",
+              "sampler": "{{settings.sampler}}",
+              "steps": "{{settings.steps}}",
+              "seed": "{{seed}}",
+              "n_samples": 1,
+              "negative_prompt": "{{negative_prompt}}",
+              "ucPreset": "{{negative_preset_index}}",
+              "qualityToggle": "{{settings.quality_tags}}",
+              "dynamic_thresholding": false,
+              "controlnet_strength": 1,
+              "legacy": false,
+              "add_original_image": true,
+              "cfg_rescale": "{{settings.cfg_rescale}}",
+              "noise_schedule": "{{settings.noise_schedule}}",
+              "uncond_scale": 1,
+              "params_version": 1,
+              "sm": "{{settings.smea}}",
+              "sm_dyn": false,
+              "legacy_v3_extend": false
+            }
+          }
+        }
+      ]
+    },
+    "prompt": {
+      "model_setting": "model",
+      "size_setting": "size",
+      "seed_setting": "seed",
+      "quality_tags_setting": "quality_tags",
+      "negative_preset_setting": "uc_preset",
+      "negative_preset_order": ["heavy", "light", "human_focus", "none"],
+      "extra_negative_setting": "negative_prompt",
+      "strip_nsfw_prefix": true,
+      "size_multiple": 64,
+      "min_side": 64,
+      "max_side": 2048,
+      "quality_tags": {
+        "nai-diffusion-4-5-full": "very aesthetic, masterpiece, no text",
+        "nai-diffusion-4-5-curated": "location, very aesthetic, masterpiece, no text",
+        "nai-diffusion-4-full": "no text, best quality, very aesthetic, absurdres",
+        "nai-diffusion-4-curated-preview": "rating:general, amazing quality, very aesthetic, absurdres",
+        "nai-diffusion-3": "best quality, amazing quality, very aesthetic, absurdres",
+        "nai-diffusion-furry-3": "{best quality}, {amazing quality}"
+      },
+      "negative_presets": {
+        "nai-diffusion-4-5-full": {
+          "heavy": "nsfw, lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page",
+          "light": "nsfw, lowres, artistic error, scan artifacts, worst quality, bad quality, jpeg artifacts, multiple views, very displeasing, too many watermarks, negative space, blank page",
+          "human_focus": "nsfw, lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page, @_@, mismatched pupils, glowing eyes, bad anatomy",
+          "none": ""
+        },
+        "nai-diffusion-4-5-curated": {
+          "heavy": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page",
+          "light": "blurry, lowres, upscaled, artistic error, scan artifacts, jpeg artifacts, logo, too many watermarks, negative space, blank page",
+          "human_focus": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, bad anatomy, bad hands, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, @_@, mismatched pupils, glowing eyes, negative space, blank page",
+          "none": ""
+        },
+        "nai-diffusion-4-full": {
+          "heavy": "nsfw, blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, multiple views, logo, too many watermarks, white blank page, blank page",
+          "light": "nsfw, blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing, white blank page, blank page",
+          "none": ""
+        },
+        "nai-diffusion-4-curated-preview": {
+          "heavy": "blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, logo, dated, signature, multiple views, gigantic breasts, white blank page, blank page",
+          "light": "blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing, logo, dated, signature",
+          "none": ""
+        },
+        "nai-diffusion-3": {
+          "heavy": "nsfw, lowres, {bad}, error, fewer, extra, missing, worst quality, jpeg artifacts, bad quality, watermark, unfinished, displeasing, chromatic aberration, signature, extra digits, artistic error, username, scan, [abstract]",
+          "light": "nsfw, lowres, jpeg artifacts, worst quality, watermark, blurry, very displeasing",
+          "none": "lowres"
+        },
+        "nai-diffusion-furry-3": {
+          "heavy": "nsfw, {{worst quality}}, [displeasing], {unusual pupils}, guide lines, {{unfinished}}, {bad}, url, artist name, {{tall image}}, mosaic, {sketch page}, comic panel, impact (font), [dated], {logo}, ych, {what}, {where is your god now}, {distorted text}, repeated text, {floating head}, {1994}, {widescreen}, absolutely everyone, sequence, {compression artifacts}, hard translated, {cropped}, {commissioner name}, unknown text, high contrast",
+          "light": "{worst quality}, guide lines, unfinished, bad, url, tall image, widescreen, compression artifacts, unknown text",
+          "none": "lowres"
+        }
+      }
+    }
+  },
+  "permissions": ["image:generate"],
+  "compatibility": {"platform_api": ">=1.0.0 <2.0.0"},
+  "config_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["api_token"],
+    "properties": {
+      "api_token": {
+        "type": "string",
+        "title": "NovelAI API Token",
+        "description": "在 novelai.net 的 Settings → Account → Get Persistent API Token 获取，以 pst- 开头。只保存在你的账户里，加密存储。",
+        "format": "password",
+        "maxLength": 4096
+      },
+      "model": {
+        "type": "string",
+        "title": "模型",
+        "enum": ["nai-diffusion-4-5-full", "nai-diffusion-4-5-curated", "nai-diffusion-4-full", "nai-diffusion-4-curated-preview", "nai-diffusion-3", "nai-diffusion-furry-3"],
+        "default": "nai-diffusion-4-5-full"
+      },
+      "size": {
+        "type": "string",
+        "title": "默认尺寸",
+        "description": "Opus 订阅在 1024×1024 像素以内、28 步以内的单张生成不消耗 Anlas。",
+        "enum": ["832x1216", "1216x832", "1024x1024", "512x768", "768x512", "640x640", "1024x1536", "1536x1024", "1472x1472"],
+        "default": "832x1216"
+      },
+      "sampler": {
+        "type": "string",
+        "title": "采样器",
+        "enum": ["k_euler_ancestral", "k_euler", "k_dpmpp_2m", "k_dpmpp_2s_ancestral", "k_dpmpp_sde", "k_dpmpp_2m_sde", "ddim"],
+        "default": "k_euler_ancestral"
+      },
+      "steps": {"type": "integer", "title": "步数", "minimum": 1, "maximum": 50, "default": 28},
+      "scale": {"type": "number", "title": "提示词相关性（Guidance）", "minimum": 1, "maximum": 10, "default": 5},
+      "uc_preset": {
+        "type": "string",
+        "title": "负面预设",
+        "description": "对应 NovelAI 的 Undesired Content 预设。",
+        "enum": ["heavy", "light", "human_focus", "none"],
+        "default": "heavy"
+      },
+      "negative_prompt": {"type": "string", "title": "附加负面提示词", "description": "追加在负面预设之后，逗号分隔。", "maxLength": 2000, "default": ""},
+      "quality_tags": {"type": "boolean", "title": "自动追加质量标签", "default": true},
+      "noise_schedule": {"type": "string", "title": "噪声调度", "enum": ["karras", "native", "exponential", "polyexponential"], "default": "karras"},
+      "cfg_rescale": {"type": "number", "title": "CFG Rescale", "minimum": 0, "maximum": 1, "default": 0},
+      "smea": {"type": "boolean", "title": "SMEA（仅 V3 模型）", "default": false},
+      "seed": {"type": "integer", "title": "固定种子", "description": "0 表示每次随机。", "minimum": 0, "maximum": 4294967295, "default": 0}
+    }
+  }
+}

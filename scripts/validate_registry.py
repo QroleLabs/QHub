@@ -36,6 +36,7 @@ RUNTIME_PERMISSIONS = {
     "memory.v1": "chat:memory",
     "relationship.v1": "chat:relationship",
     "model-preference.v1": "chat:model-preference",
+    "image-provider.v1": "image:generate",
 }
 INTERNAL_RUNTIME = "internal.python.v1"
 INTERNAL_CAPABILITY_PERMISSIONS = {
@@ -297,6 +298,18 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
             isinstance(runtime.get("prompt"), str) and bool(runtime["prompt"].strip()),
             f"{context}.runtime.prompt 不能为空",
         )
+    if runtime_type == "image-provider.v1":
+        provider = runtime.get("provider")
+        request = runtime.get("request")
+        require(isinstance(provider, dict) and isinstance(provider.get("provider_id"), str) and isinstance(provider.get("title"), str), f"{context}.runtime.provider 必须包含 provider_id 与 title")
+        require(isinstance(provider.get("models"), list) and provider["models"], f"{context}.runtime.provider.models 至少要有一个模型")
+        require(isinstance(request, dict), f"{context}.runtime.request 必须是对象")
+        url = request.get("url")
+        require(isinstance(url, str) and url.startswith("https://") and "{{" not in url, f"{context}.runtime.request.url 必须是固定的 HTTPS 地址")
+        require(request.get("response_kind", "image") in {"image", "zip_image", "json_base64", "json_url"}, f"{context}.runtime.request.response_kind 无效")
+        headers = request.get("headers") or {}
+        require(isinstance(headers, dict) and not {str(k).lower() for k in headers} & {"host", "connection", "cookie", "content-length", "transfer-encoding", "accept-encoding"}, f"{context}.runtime.request.headers 含不允许的头")
+        require(request.get("body") is not None or (isinstance(request.get("variants"), list) and request["variants"] and all(isinstance(v, dict) and v.get("body") is not None for v in request["variants"])), f"{context}.runtime.request 需要 body 或每个 variant 的 body")
     if runtime_type == "model-preference.v1":
         schema = manifest.get("config_schema")
         properties = schema.get("properties") if isinstance(schema, dict) else None
@@ -322,7 +335,9 @@ def validate_manifest(manifest: dict[str, Any], context: str) -> None:
         for name, definition in properties.items()
         if _is_sensitive(name, definition)
     )
-    if runtime_type != INTERNAL_RUNTIME:
+    # Declarative image providers hold the user's own upstream credential; QScene
+    # only honours them from official, reviewed releases.
+    if runtime_type not in {INTERNAL_RUNTIME, "image-provider.v1"}:
         require(not sensitive, f"{context} 不允许敏感配置字段：{', '.join(sensitive)}")
     for field in ("repository", "homepage", "documentation"):
         if manifest.get(field) is not None:
